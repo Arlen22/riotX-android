@@ -83,7 +83,7 @@ class HomeActivity : VectorBaseActivity(), ToolbarConfigurable {
         super.onCreate(savedInstanceState)
         FcmHelper.ensureFcmTokenIsRetrieved(this, pushManager, vectorPreferences.areNotificationEnabledForDevice())
         sharedActionViewModel = viewModelProvider.get(HomeSharedActionViewModel::class.java)
-        drawerLayout.addDrawerListener(drawerListener)
+        (drawerLayout as? DrawerLayout)?.addDrawerListener(drawerListener)
         if (isFirstCreation()) {
             replaceFragment(R.id.homeDetailFragmentContainer, LoadingFragment::class.java)
             replaceFragment(R.id.homeDrawerFragmentContainer, HomeDrawerFragment::class.java)
@@ -93,10 +93,11 @@ class HomeActivity : VectorBaseActivity(), ToolbarConfigurable {
                 .observe()
                 .subscribe { sharedAction ->
                     when (sharedAction) {
-                        is HomeActivitySharedAction.OpenDrawer                 -> drawerLayout.openDrawer(GravityCompat.START)
-                        is HomeActivitySharedAction.CloseDrawer                -> drawerLayout.closeDrawer(GravityCompat.START)
+
+                        is HomeActivitySharedAction.OpenDrawer                 -> (drawerLayout as? DrawerLayout)?.openDrawer(GravityCompat.START)
+                        is HomeActivitySharedAction.CloseDrawer                -> (drawerLayout as? DrawerLayout)?.closeDrawer(GravityCompat.START)
                         is HomeActivitySharedAction.OpenGroup                  -> {
-                            drawerLayout.closeDrawer(GravityCompat.START)
+                            (drawerLayout as? DrawerLayout)?.closeDrawer(GravityCompat.START)
                             replaceFragment(R.id.homeDetailFragmentContainer, HomeDetailFragment::class.java)
                         }
                         is HomeActivitySharedAction.PromptForSecurityBootstrap -> {
@@ -227,7 +228,7 @@ class HomeActivity : VectorBaseActivity(), ToolbarConfigurable {
     }
 
     override fun onDestroy() {
-        drawerLayout.removeDrawerListener(drawerListener)
+        (drawerLayout as? DrawerLayout)?.removeDrawerListener(drawerListener)
         super.onDestroy()
     }
 
@@ -277,8 +278,9 @@ class HomeActivity : VectorBaseActivity(), ToolbarConfigurable {
     }
 
     override fun onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START)
+
+        if (drawerLayout is DrawerLayout && (drawerLayout as DrawerLayout).isDrawerOpen(GravityCompat.START)) {
+            (drawerLayout as DrawerLayout).closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }

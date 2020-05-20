@@ -20,6 +20,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.TargetApi
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.util.Pair
@@ -84,7 +85,10 @@ class AttachmentTypeSelectorView(context: Context,
         audioButton = layout.findViewById<ImageButton>(R.id.attachmentAudioButton).configure(Type.AUDIO)
         contactButton = layout.findViewById<ImageButton>(R.id.attachmentContactButton).configure(Type.CONTACT)
         contentView = root
-        width = LinearLayout.LayoutParams.MATCH_PARENT
+        val attrs = intArrayOf(android.R.attr.layout_width)
+        val ta: TypedArray = context.obtainStyledAttributes(R.style.DrawerWidth, attrs)
+//        width = LinearLayout.LayoutParams.MATCH_PARENT
+        width = ta.getLayoutDimension(0, LinearLayout.LayoutParams.MATCH_PARENT)
         height = LinearLayout.LayoutParams.WRAP_CONTENT
         animationStyle = 0
         @Suppress("DEPRECATION")
@@ -92,6 +96,7 @@ class AttachmentTypeSelectorView(context: Context,
         inputMethodMode = INPUT_METHOD_NOT_NEEDED
         isFocusable = true
         isTouchable = true
+        ta.recycle()
     }
 
     fun show(anchor: View, isKeyboardOpen: Boolean) {
@@ -106,7 +111,12 @@ class AttachmentTypeSelectorView(context: Context,
             } else {
                 contentView.height
             }
-            showAtLocation(anchor, Gravity.NO_GRAVITY, 0, anchorCoordinates[1] - contentViewHeight)
+            val contentViewWidth = if (contentView.width == 0) {
+                contentView.getMeasurements().first
+            } else {
+                contentView.width
+            }
+            showAtLocation(anchor, Gravity.NO_GRAVITY, anchorCoordinates[0] - contentViewWidth, anchorCoordinates[1] - contentViewHeight)
         }
         contentView.doOnNextLayout {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
